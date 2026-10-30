@@ -1,0 +1,12 @@
+<form method="GET" action="<%= action %>" role="search" class="form-row">
+    <div class="form-group flex-1">
+        <label for="access-search">Buscar acesso</label>
+        <input class="form-control" type="search" id="access-search" name="q" value="<%= query %>" maxlength="200"
+            placeholder="Nome, e-mail, código, link ou lookbook" aria-describedby="access-search-hint">
+        <span class="text-sm text-muted" id="access-search-hint">Você pode digitar apenas parte do texto, com ou sem acentos.</span>
+    </div>
+    <div class="form-group align-bottom">
+        <button class="btn btn-primary" type="submit">Buscar</button>
+        <% if (query) { %><a class="btn btn-secondary" href="<%= action %>">Limpar busca</a><% } %>
+    </div>
+</form>

@@ -5,6 +5,7 @@ const adminAuth = require('../middleware/adminAuth');
 const panelAuth = require('../middleware/panelAuth');
 const service = require('../services/panelUserService');
 const { comparePassword, hashPassword } = require('../utils/hash');
+const { searchTerm, filterAccesses } = require('../utils/accessSearch');
 function users(res, error = null, status = 200) {
     const users = db.prepare('SELECT id,username,role,is_active,must_change_password,created_at FROM admin_users ORDER BY id').all();
     return res.status(status).render('admin/users', { users, error });
@@ -43,9 +44,11 @@ router.post('/account/password', panelAuth, panelAuth.csrf, async (req, res) => 
     } catch (error) { res.status(error.status || 503).render('admin/change-password', { error: error.status ? error.message : 'Não foi possível atualizar a senha.' }); }
 });
 router.get('/accesses', panelAuth, (req, res) => {
-    const links = db.prepare(`SELECT al.id,al.token,al.recipient_name,al.recipient_email,al.version_code,al.max_views,al.views_count,
+    const links = db.prepare(`SELECT al.id,al.token,al.recipient_name,al.recipient_email,al.version_code,al.access_code,al.max_views,al.views_count,
         al.expires_at,al.is_active,al.created_at,d.title document_title,d.is_active document_is_active
         FROM access_links al JOIN documents d ON d.id=al.document_id ORDER BY al.created_at DESC,al.id DESC`).all();
-    res.render('admin/accesses', { links, baseUrl: process.env.BASE_URL || `http://localhost:${process.env.PORT || 3000}` });
+    const query = searchTerm(req.query.q);
+    res.render('admin/accesses', { links: filterAccesses(links, query), totalLinks: links.length, query,
+        baseUrl: process.env.BASE_URL || `http://localhost:${process.env.PORT || 3000}` });
 });
 module.exports = router;

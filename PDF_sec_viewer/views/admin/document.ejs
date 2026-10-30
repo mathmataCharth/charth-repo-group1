@@ -189,16 +189,21 @@
         </div>
 
         <!-- Links Table -->
+        <% const matchingLinks = filterAccesses(links, accessSearch, doc.title); %>
         <div class="card" id="access-links">
             <div class="card-header">
                 <h3>Acessos Criados (<%= links.length %>)</h3>
             </div>
             <div class="card-body p-0">
+                <div class="card-body">
+                    <%- include('access-search', { action: '/admin/documents/' + doc.id + '#access-links', query: accessSearch }) %>
+                    <p class="text-sm text-muted" role="status"><%= matchingLinks.length %> de <%= links.length %> acessos</p>
+                </div>
                 <% if (typeof linkUpdated !== 'undefined' && linkUpdated) { %>
                     <div class="alert alert-success" role="status">Limites do acesso atualizados.</div>
                 <% } %>
-                <% if (links.length === 0) { %>
-                    <p class="empty-state">Nenhum acesso criado ainda.</p>
+                <% if (matchingLinks.length === 0) { %>
+                    <p class="empty-state"><%= accessSearch ? 'Nenhum acesso encontrado para esta busca.' : 'Nenhum acesso criado ainda.' %></p>
                 <% } else { %>
                     <div class="table-responsive">
                         <table class="table">
@@ -216,7 +221,7 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                <% links.forEach(link => { %>
+                                <% matchingLinks.forEach(link => { %>
                                     <% const linkUrl = baseUrl + '/v/' + link.token; %>
                                     <% const editing = typeof editError !== 'undefined' && editError.id === link.id; %>
                                     <tr class="<%= link.is_active ? '' : 'row-inactive' %>">

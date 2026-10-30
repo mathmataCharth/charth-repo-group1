@@ -20,6 +20,7 @@ const { scheduleDocument, statusForDocument } = require('../services/imagePrepar
 const revisions = require('../services/documentRevisionService');
 const { documentVersion } = require('../utils/documentVersion');
 const panelAuth = require('../middleware/panelAuth');
+const { searchTerm, filterAccesses } = require('../utils/accessSearch');
 const loginLimit = require('express-rate-limit')({ windowMs: 15 * 60 * 1000, max: 10,
     standardHeaders: true, legacyHeaders: false, skipSuccessfulRequests: true,
     message: 'Muitas tentativas de login. Aguarde 15 minutos antes de tentar novamente.' });
@@ -27,6 +28,8 @@ router.use(require('../middleware/security'));
 
 router.use((req, res, next) => {
     res.locals.expiryInput = expiryInput;
+    res.locals.accessSearch = searchTerm(req.query.q);
+    res.locals.filterAccesses = filterAccesses;
     res.locals.isExpired = isExpired;
     res.locals.revisionsForDocument = revisions.revisionsForDocument;
     res.locals.documentVersion = documentVersion;

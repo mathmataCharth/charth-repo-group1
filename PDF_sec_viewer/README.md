@@ -141,6 +141,12 @@ desativar a conta ou redefinir sua senha inicial, revogando imediatamente as ses
 existentes. Contas administrativas existentes preservam suas senhas e permissões.
 As permissões e a versão da sessão são verificadas no banco em cada requisição.
 
+Em **Acessos**, a busca encontra destinatários por nome, e-mail, código atual ou
+anterior, link e título do lookbook. Aceita trechos e várias palavras, ignorando
+acentos e maiúsculas. **Limpar busca** retorna à lista completa. O administrador
+também pode buscar dentro da lista de acessos de cada documento, sem alterar os
+registros, suas contagens de visualização ou as permissões do setor atacado.
+
 ### Atualizar o PDF dos acessos existentes
 
 No painel do documento, use **Atualizar PDF → Enviar nova versão**. Os mesmos

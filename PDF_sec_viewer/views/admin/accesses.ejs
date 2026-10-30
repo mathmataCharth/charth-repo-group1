@@ -5,8 +5,11 @@
 <body><%- include('panel-header') %>
 <main class="admin-main"><div class="page-title-row"><h2>Acessos criados</h2></div>
     <% if (panelUser.role === 'setor_atacado') { %><p>Setor atacado · consulta dos acessos existentes.</p><% } %>
-    <section class="card"><div class="card-header"><h3><%= links.length %> acessos cadastrados</h3></div><div class="card-body p-0 table-responsive">
-    <% if (!links.length) { %><p class="empty-state">Nenhum acesso criado.</p><% } else { %>
+    <section class="card"><div class="card-header"><h3><%= query ? 'Resultado da busca' : 'Acessos cadastrados' %></h3></div>
+    <div class="card-body"><%- include('access-search', { action: '/admin/accesses', query }) %>
+        <p class="text-sm text-muted" role="status"><%= links.length %> de <%= totalLinks %> acessos</p>
+    </div><div class="card-body p-0 table-responsive">
+    <% if (!links.length) { %><p class="empty-state"><%= query ? 'Nenhum acesso encontrado para esta busca.' : 'Nenhum acesso criado.' %></p><% } else { %>
     <table class="table"><thead><tr><th>Documento</th><th>Destinatário</th><th>Código</th><th>Link</th><th>Visualizações</th><th>Expira em (Brasília)</th><th>Status</th></tr></thead><tbody>
     <% links.forEach(link => { %><tr>
         <td><%= link.document_title %></td><td><strong><%= link.recipient_name %></strong><div class="text-sm text-muted"><%= link.recipient_email || '—' %></div></td>
