@@ -14,6 +14,7 @@ fs.mkdirSync(path.join(folder, 'data'));
 process.chdir(folder);
 process.env.UPLOAD_DIR = folder;
 const db = require('../src/config/database');
+db.prepare("INSERT INTO admin_users(id,username,password_hash) VALUES (1,'test-admin','unused')").run();
 const { createDocument } = require('../src/services/documentService');
 const { createLink, getLinkById } = require('../src/services/accessService');
 let server, base, document, link, other;

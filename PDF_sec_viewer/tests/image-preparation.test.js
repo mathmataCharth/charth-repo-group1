@@ -13,6 +13,7 @@ process.chdir(folder);
 fs.mkdirSync('data');
 process.env.UPLOAD_DIR = folder;
 const db = require('../src/config/database');
+db.prepare("INSERT INTO admin_users(id,username,password_hash) VALUES (1,'test-admin','unused')").run();
 const { createDocument, deleteDocument } = require('../src/services/documentService');
 const { createLink, getLinkById, deleteLink } = require('../src/services/accessService');
 const jobs = require('../src/services/imagePreparationService');

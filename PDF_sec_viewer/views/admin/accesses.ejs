@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Acessos | CHARTH</title>
+<link rel="stylesheet" href="/public/shared/css/base.css"><link rel="stylesheet" href="/public/admin/css/admin.css"></head>
+<body><%- include('panel-header') %>
+<main class="admin-main"><div class="page-title-row"><h2>Acessos criados</h2></div>
+    <% if (panelUser.role === 'setor_atacado') { %><p>Setor atacado · consulta dos acessos existentes.</p><% } %>
+    <section class="card"><div class="card-header"><h3><%= links.length %> acessos cadastrados</h3></div><div class="card-body p-0 table-responsive">
+    <% if (!links.length) { %><p class="empty-state">Nenhum acesso criado.</p><% } else { %>
+    <table class="table"><thead><tr><th>Documento</th><th>Destinatário</th><th>Código</th><th>Link</th><th>Visualizações</th><th>Expira em (Brasília)</th><th>Status</th></tr></thead><tbody>
+    <% links.forEach(link => { %><tr>
+        <td><%= link.document_title %></td><td><strong><%= link.recipient_name %></strong><div class="text-sm text-muted"><%= link.recipient_email || '—' %></div></td>
+        <td>2027_<%= link.version_code %></td><td><button type="button" class="btn btn-xs btn-secondary copy-link-btn" data-url="<%= baseUrl + '/v/' + link.token %>">Copiar link</button></td>
+        <td><%= link.views_count %><%= link.max_views ? ' / ' + link.max_views : ' / ilimitado' %></td>
+        <td><%= link.expires_at ? expiryInput(link.expires_at).replace('T', ' ') : 'Sem prazo' %></td>
+        <td><%= !link.document_is_active ? 'Documento desativado' : !link.is_active ? 'Acesso desativado' : link.expires_at && isExpired(link.expires_at) ? 'Expirado' : link.max_views && link.views_count >= link.max_views ? 'Limite atingido' : 'Ativo' %></td>
+    </tr><% }); %></tbody></table><% } %>
+    </div></section>
+</main><script src="/public/admin/js/admin.js"></script></body></html>

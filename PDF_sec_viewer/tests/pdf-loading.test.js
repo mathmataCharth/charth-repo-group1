@@ -16,6 +16,7 @@ fs.mkdirSync(path.join(temporary, 'data'));
 process.chdir(temporary);
 process.env.UPLOAD_DIR = temporary;
 const db = require('../src/config/database');
+db.prepare("INSERT INTO admin_users(id,username,password_hash) VALUES (1,'test-admin','unused')").run();
 const { createDocument, deleteDocument } = require('../src/services/documentService');
 const { createLink } = require('../src/services/accessService');
 let server, base, cookie, id, file, version;

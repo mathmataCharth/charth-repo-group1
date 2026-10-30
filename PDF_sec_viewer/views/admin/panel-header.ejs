@@ -1,0 +1,15 @@
+<header class="admin-header">
+    <div class="header-inner">
+        <a href="<%= panelUser.role === 'admin' ? '/admin/dashboard' : '/admin/accesses' %>">
+            <img class="header-logo" alt="Charth" src="https://charth.vtexassets.com/assets/vtex/assets-builder/charth.store/1.1.133/img/logo-charth___cdf0830626d6b6c0798360d0e9cf8d7e.png">
+        </a>
+        <nav class="header-nav" aria-label="Navegação do painel">
+            <% if (panelUser.role === 'admin') { %><a class="nav-link" href="/admin/dashboard">Documentos</a><% } %>
+            <a class="nav-link" href="/admin/accesses">Acessos</a>
+            <% if (panelUser.role === 'admin') { %><a class="nav-link" href="/admin/users">Usuários</a><% } %>
+            <% if (panelUser.role === 'admin') { %><a class="nav-link" href="/admin/logs">Logs</a><% } %>
+            <a class="nav-link" href="/admin/account/password">Minha senha</a>
+            <form method="POST" action="/admin/logout"><button class="btn-outline-sm" type="submit">Sair</button></form>
+        </nav>
+    </div>
+</header>

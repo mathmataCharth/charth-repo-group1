@@ -61,6 +61,17 @@ CREATE TABLE IF NOT EXISTS admin_users (
 );
 `);
 
+// Existing accounts retain administrator permissions; new sector accounts are explicit.
+const accountColumns = new Set(db.prepare('PRAGMA table_info(admin_users)').all().map(column => column.name));
+for (const [name, definition] of Object.entries({
+    role: "TEXT NOT NULL DEFAULT 'admin'",
+    is_active: 'INTEGER NOT NULL DEFAULT 1',
+    must_change_password: 'INTEGER NOT NULL DEFAULT 0',
+    auth_version: 'INTEGER NOT NULL DEFAULT 0'
+})) {
+    if (!accountColumns.has(name)) db.exec(`ALTER TABLE admin_users ADD COLUMN ${name} ${definition}`);
+}
+
 // Add identifiers to existing installations without changing tokens or passwords.
 require('../utils/accessCode').migrateAccessCodes(db);
 

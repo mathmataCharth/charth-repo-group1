@@ -15,13 +15,19 @@ const { hashPassword, comparePassword } = require('../utils/hash');
 const { generateToken } = require('../utils/token');
 const { getAllDocuments, getDocumentById, createDocument, toggleDocument, deleteDocument } = require('../services/documentService');
 const { getLinksForDocument, createLink, toggleLink, deleteLink, getLinkById, updateLinkLimits } = require('../services/accessService');
-const { parseAccessLimits, expiryInput } = require('../utils/accessLimits');
+const { parseAccessLimits, expiryInput, isExpired } = require('../utils/accessLimits');
 const { scheduleDocument, statusForDocument } = require('../services/imagePreparationService');
 const revisions = require('../services/documentRevisionService');
 const { documentVersion } = require('../utils/documentVersion');
+const panelAuth = require('../middleware/panelAuth');
+const loginLimit = require('express-rate-limit')({ windowMs: 15 * 60 * 1000, max: 10,
+    standardHeaders: true, legacyHeaders: false, skipSuccessfulRequests: true,
+    message: 'Muitas tentativas de login. Aguarde 15 minutos antes de tentar novamente.' });
+router.use(require('../middleware/security'));
 
 router.use((req, res, next) => {
     res.locals.expiryInput = expiryInput;
+    res.locals.isExpired = isExpired;
     res.locals.revisionsForDocument = revisions.revisionsForDocument;
     res.locals.documentVersion = documentVersion;
     res.locals.revisionDate = value => value ? new Intl.DateTimeFormat('pt-BR', { timeZone: 'America/Sao_Paulo',
@@ -56,34 +62,42 @@ const upload = multer({
 
 // GET /admin/login
 router.get('/login', (req, res) => {
-    if (req.session && req.session.adminId) {
-        return res.redirect('/admin/dashboard');
-    }
+    if (req.session?.adminId) return panelAuth(req, res, () => res.redirect(req.panelUser.role === 'admin' ? '/admin/dashboard' : '/admin/accesses'));
     res.render('admin/login', { error: null });
 });
 
 // POST /admin/login
-router.post('/login', async (req, res) => {
+router.post('/login', loginLimit, async (req, res, next) => {
+    try {
     const { username, password } = req.body;
 
-    if (!username || !password) {
-        return res.render('admin/login', { error: 'Preencha todos os campos.' });
+    if (typeof username !== 'string' || typeof password !== 'string' || !username.trim() || !password || username.length > 128 || password.length > 1024) {
+        return res.status(400).render('admin/login', { error: 'Preencha todos os campos.' });
     }
 
-    const user = db.prepare('SELECT * FROM admin_users WHERE username = ?').get(username);
-
+    let user = db.prepare('SELECT * FROM admin_users WHERE username = ?').get(username.trim());
     if (!user) {
-        return res.render('admin/login', { error: 'Usuário ou senha inválidos.' });
+        const matches = db.prepare('SELECT * FROM admin_users WHERE username=? COLLATE NOCASE').all(username.trim());
+        if (matches.length === 1) user = matches[0];
+    }
+
+    if (!user || !user.is_active || !['admin', 'setor_atacado'].includes(user.role)) {
+        return res.status(401).render('admin/login', { error: 'Usuário ou senha inválidos.' });
     }
 
     const ok = await comparePassword(password, user.password_hash);
     if (!ok) {
-        return res.render('admin/login', { error: 'Usuário ou senha inválidos.' });
+        return res.status(401).render('admin/login', { error: 'Usuário ou senha inválidos.' });
     }
 
+    const current = db.prepare('SELECT * FROM admin_users WHERE id=?').get(user.id);
+    if (!current || !current.is_active || current.auth_version !== user.auth_version || current.password_hash !== user.password_hash) return res.status(401).render('admin/login', { error: 'Usuário ou senha inválidos.' });
+    await new Promise((resolve, reject) => req.session.regenerate(error => error ? reject(error) : resolve()));
     req.session.adminId = user.id;
     req.session.adminUsername = user.username;
-    return res.redirect('/admin/dashboard');
+    req.session.panelAuthVersion = user.auth_version;
+    return res.redirect(user.must_change_password ? '/admin/account/password' : user.role === 'admin' ? '/admin/dashboard' : '/admin/accesses');
+    } catch (error) { next(error); }
 });
 
 // POST /admin/logout
@@ -92,6 +106,15 @@ router.post('/logout', (req, res) => {
         res.redirect('/admin/login');
     });
 });
+
+// The sector can only reach the explicit consultation/password routes above this
+// default-deny boundary. Every existing and future management route is admin-only.
+router.use(require('./panelAccounts'));
+router.get('/dashboard', panelAuth, (req, res, next) => {
+    if (req.panelUser.role === 'setor_atacado') return res.redirect('/admin/accesses');
+    next();
+});
+router.use(adminAuth);
 
 // GET /admin/dashboard
 router.get('/dashboard', adminAuth, (req, res) => {

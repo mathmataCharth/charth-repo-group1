@@ -11,6 +11,7 @@ const previous = process.cwd(), previousUpload = process.env.UPLOAD_DIR;
 const folder = fs.mkdtempSync(path.join(os.tmpdir(), 'lookbook-revisions-'));
 fs.mkdirSync(path.join(folder, 'data')); process.chdir(folder); process.env.UPLOAD_DIR = folder;
 const db = require('../src/config/database');
+db.prepare("INSERT INTO admin_users(id,username,password_hash) VALUES (1,'test-admin','unused')").run();
 const documents = require('../src/services/documentService');
 const accesses = require('../src/services/accessService');
 const revisions = require('../src/services/documentRevisionService');

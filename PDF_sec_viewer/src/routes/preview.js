@@ -12,11 +12,7 @@ const { getPreviewInfo, getReadyImage } = require('../services/imagePreviewServi
 const { documentVersion } = require('../utils/documentVersion');
 
 router.use(security);
-router.use((req, res, next) => {
-    if (req.session?.adminId) return next();
-    if (req.path === '/') return res.redirect('/admin/login');
-    return res.status(401).json({ error: 'Entre no painel para continuar o teste.' });
-});
+router.use(require('../middleware/adminAuth'));
 
 function context(id, revisionId) {
     if (!/^[1-9]\d*$/.test(String(id))) return null;

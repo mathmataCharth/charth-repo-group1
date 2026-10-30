@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Usuários | CHARTH</title>
+<link rel="stylesheet" href="/public/shared/css/base.css"><link rel="stylesheet" href="/public/admin/css/admin.css"></head>
+<body>
+<%- include('panel-header') %>
+<main class="admin-main">
+    <div class="page-title-row"><h2>Usuários do painel</h2></div>
+    <% if (error) { %><div class="alert alert-error" role="alert"><%= error %></div><% } %>
+    <section class="card mb-24"><div class="card-header"><h3>Novo usuário — setor atacado</h3></div><div class="card-body">
+        <p>Este perfil pode somente consultar os acessos existentes. A senha inicial deverá ser trocada no primeiro login.</p>
+        <form action="/admin/users" method="POST" class="form-row" autocomplete="off">
+            <input type="hidden" name="_csrf" value="<%= panelCsrf %>">
+            <div class="form-group flex-1"><label for="username">Nome de usuário</label><input class="form-control" id="username" name="username" required minlength="3" maxlength="64" autocomplete="off"></div>
+            <div class="form-group flex-1"><label for="password">Senha inicial</label><input class="form-control" id="password" name="password" type="password" required minlength="6" maxlength="72" autocomplete="new-password"><span class="text-sm text-muted">Mínimo de 6 caracteres. A senha definitiva exige pelo menos 12.</span></div>
+            <div class="form-group align-bottom"><button class="btn btn-primary" type="submit">Criar usuário</button></div>
+        </form>
+    </div></section>
+    <section class="card"><div class="card-header"><h3>Usuários cadastrados</h3></div><div class="card-body p-0 table-responsive">
+        <table class="table"><thead><tr><th>Usuário</th><th>Perfil</th><th>Status</th><th>Senha</th><th>Ações</th></tr></thead><tbody>
+        <% users.forEach(user => { %><tr>
+            <td><strong><%= user.username %></strong></td><td><%= user.role === 'admin' ? 'Administrador' : 'Setor atacado' %></td>
+            <td><%= user.is_active ? 'Ativo' : 'Desativado' %></td><td><%= user.must_change_password ? 'Troca obrigatória no próximo login' : 'Definida pelo usuário' %></td>
+            <td><% if (user.role === 'setor_atacado') { %>
+                <form method="POST" action="/admin/users/<%= user.id %>/toggle"><input type="hidden" name="_csrf" value="<%= panelCsrf %>"><button class="btn btn-xs btn-secondary" type="submit"><%= user.is_active ? 'Desativar usuário' : 'Ativar usuário' %></button></form>
+                <details><summary>Redefinir senha</summary><form method="POST" action="/admin/users/<%= user.id %>/reset-password" autocomplete="off">
+                    <input type="hidden" name="_csrf" value="<%= panelCsrf %>"><label for="reset-<%= user.id %>">Nova senha inicial</label>
+                    <input class="form-control" id="reset-<%= user.id %>" type="password" name="password" required minlength="6" maxlength="72" autocomplete="new-password">
+                    <button class="btn btn-xs btn-secondary" type="submit">Redefinir e exigir troca</button>
+                </form></details>
+            <% } %></td>
+        </tr><% }); %>
+        </tbody></table>
+    </div></section>
+</main></body></html>

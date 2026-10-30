@@ -125,6 +125,22 @@ O usuário admin é criado automaticamente no banco ao iniciar, com as credencia
 
 ## Instalação e execução
 
+### Usuários do painel e setor atacado
+
+O administrador gerencia contas em **Usuários** (`/admin/users`). As contas novas
+recebem o perfil **Setor atacado** e acessam exclusivamente a consulta de links em
+`/admin/accesses`, com destinatário, código, visualizações, limites, prazo e status.
+Podem copiar os links existentes. Não podem enviar ou visualizar PDFs pela prévia
+administrativa, criar acessos, editar limites, ativar/desativar acessos ou excluir
+registros; o servidor bloqueia essas rotas independentemente dos botões da tela.
+
+O administrador define uma senha inicial de pelo menos seis caracteres. No primeiro
+login, o usuário precisa substituí-la por uma senha de pelo menos 12 caracteres.
+A senha nunca é exibida novamente nem armazenada em texto. O administrador pode
+desativar a conta ou redefinir sua senha inicial, revogando imediatamente as sessões
+existentes. Contas administrativas existentes preservam suas senhas e permissões.
+As permissões e a versão da sessão são verificadas no banco em cada requisição.
+
 ### Atualizar o PDF dos acessos existentes
 
 No painel do documento, use **Atualizar PDF → Enviar nova versão**. Os mesmos

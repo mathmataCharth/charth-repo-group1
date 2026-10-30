@@ -5,7 +5,7 @@
     background: var(--charth-offwhite);
     border-bottom: 1px solid var(--charth-border);
     padding: 0 32px;
-    height: 56px;
+    min-height: 56px;
     display: flex;
     align-items: center;
     position: sticky;
@@ -16,6 +16,9 @@
 
 .header-inner {
     display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    padding: 10px 0;
     align-items: center;
     justify-content: space-between;
     width: 100%;
@@ -31,9 +34,12 @@
 
 .header-nav {
     display: flex;
+    flex-wrap: wrap;
     align-items: center;
     gap: 8px;
 }
+
+.table-responsive { overflow-x: auto; }
 
 .nav-link {
     color: var(--charth-text-muted);
