@@ -93,7 +93,7 @@
                         <table class="table">
                             <thead>
                                 <tr>
-                                    <th>Data/Hora</th>
+                                    <th>Data/Hora (Brasília)</th>
                                     <th>Documento</th>
                                     <th>Destinatário</th>
                                     <th>Ação</th>
@@ -104,7 +104,7 @@
                             <tbody>
                                 <% logs.forEach(entry => { %>
                                     <tr>
-                                        <td class="text-sm text-nowrap"><%= entry.created_at.slice(0, 19).replace('T', ' ') %></td>
+                                        <td class="text-sm text-nowrap"><%= formatDateTime(entry.created_at) %></td>
                                         <td class="text-sm"><%= entry.document_title %></td>
                                         <td class="text-sm">
                                             <strong><%= entry.recipient_name %></strong>

@@ -15,7 +15,7 @@ const { hashPassword, comparePassword } = require('../utils/hash');
 const { generateToken } = require('../utils/token');
 const { getAllDocuments, getDocumentById, createDocument, toggleDocument, deleteDocument } = require('../services/documentService');
 const { getLinksForDocument, createLink, toggleLink, deleteLink, getLinkById, updateLinkLimits } = require('../services/accessService');
-const { parseAccessLimits, expiryInput, isExpired } = require('../utils/accessLimits');
+const { parseAccessLimits, expiryInput, formatDateTime, isExpired } = require('../utils/accessLimits');
 const { scheduleDocument, statusForDocument } = require('../services/imagePreparationService');
 const revisions = require('../services/documentRevisionService');
 const { documentVersion } = require('../utils/documentVersion');
@@ -28,13 +28,12 @@ router.use(require('../middleware/security'));
 
 router.use((req, res, next) => {
     res.locals.expiryInput = expiryInput;
+    res.locals.formatDateTime = formatDateTime;
     res.locals.accessSearch = searchTerm(req.query.q);
     res.locals.filterAccesses = filterAccesses;
     res.locals.isExpired = isExpired;
     res.locals.revisionsForDocument = revisions.revisionsForDocument;
     res.locals.documentVersion = documentVersion;
-    res.locals.revisionDate = value => value ? new Intl.DateTimeFormat('pt-BR', { timeZone: 'America/Sao_Paulo',
-        dateStyle: 'short', timeStyle: 'short' }).format(new Date(value.includes('T') ? value : value.replace(' ', 'T') + 'Z')) : '—';
     next();
 });
 

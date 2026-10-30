@@ -80,7 +80,7 @@
                                     <th>Arquivo Original</th>
                                     <th>Páginas</th>
                                     <th>Links Ativos</th>
-                                    <th>Upload em</th>
+                                    <th>Upload em (Brasília)</th>
                                     <th>Status</th>
                                     <th>Ações</th>
                                 </tr>
@@ -94,7 +94,7 @@
                                         <td>
                                             <span class="badge badge-info"><%= doc.active_links_count %></span>
                                         </td>
-                                        <td class="text-sm"><%= doc.uploaded_at.slice(0, 16).replace('T', ' ') %></td>
+                                        <td class="text-sm"><%= formatDateTime(doc.uploaded_at) %></td>
                                         <td>
                                             <% if (doc.is_active) { %>
                                                 <span class="badge badge-success">Ativo</span>

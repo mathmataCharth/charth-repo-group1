@@ -20,6 +20,14 @@ function expiryInput(value) {
     return `${parts.year.padStart(4, '0')}-${parts.month}-${parts.day}T${parts.hour}:${parts.minute}`;
 }
 
+function formatDateTime(value) {
+    const local = expiryInput(value);
+    if (!local) return '—';
+    const [date, time] = local.split('T');
+    const [year, month, day] = date.split('-');
+    return `${day}/${month}/${year} ${time}`;
+}
+
 function isExpired(value, now = Date.now()) {
     return Boolean(value) && expiryDate(value).getTime() <= now;
 }
@@ -52,4 +60,4 @@ function parseAccessLimits(body) {
     throw new Error('Esta data e hora não existem no horário de Brasília.');
 }
 
-module.exports = { parseAccessLimits, expiryInput, isExpired };
+module.exports = { parseAccessLimits, expiryInput, formatDateTime, isExpired };

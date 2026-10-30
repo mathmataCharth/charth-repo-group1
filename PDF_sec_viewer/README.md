@@ -147,6 +147,11 @@ acentos e maiúsculas. **Limpar busca** retorna à lista completa. O administrad
 também pode buscar dentro da lista de acessos de cada documento, sem alterar os
 registros, suas contagens de visualização ou as permissões do setor atacado.
 
+As datas exibidas no painel seguem **DD/MM/AAAA HH:MM**, no horário de Brasília,
+incluindo uploads, criação/expiração dos acessos, versões do PDF e registros de
+acesso. O formato de armazenamento e os valores usados pelos campos de edição
+permanecem compatíveis com os prazos existentes.
+
 ### Atualizar o PDF dos acessos existentes
 
 No painel do documento, use **Atualizar PDF → Enviar nova versão**. Os mesmos

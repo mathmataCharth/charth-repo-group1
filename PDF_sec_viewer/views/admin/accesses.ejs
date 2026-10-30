@@ -15,7 +15,7 @@
         <td><%= link.document_title %></td><td><strong><%= link.recipient_name %></strong><div class="text-sm text-muted"><%= link.recipient_email || '—' %></div></td>
         <td>2027_<%= link.version_code %></td><td><button type="button" class="btn btn-xs btn-secondary copy-link-btn" data-url="<%= baseUrl + '/v/' + link.token %>">Copiar link</button></td>
         <td><%= link.views_count %><%= link.max_views ? ' / ' + link.max_views : ' / ilimitado' %></td>
-        <td><%= link.expires_at ? expiryInput(link.expires_at).replace('T', ' ') : 'Sem prazo' %></td>
+        <td><%= link.expires_at ? formatDateTime(link.expires_at) : 'Sem prazo' %></td>
         <td><%= !link.document_is_active ? 'Documento desativado' : !link.is_active ? 'Acesso desativado' : link.expires_at && isExpired(link.expires_at) ? 'Expirado' : link.max_views && link.views_count >= link.max_views ? 'Limite atingido' : 'Ativo' %></td>
     </tr><% }); %></tbody></table><% } %>
     </div></section>

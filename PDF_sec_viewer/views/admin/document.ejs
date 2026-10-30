@@ -59,7 +59,7 @@
                     <dt>Arquivo</dt><dd><%= doc.original_filename %></dd>
                     <dt>Tamanho</dt><dd><%= (doc.file_size / 1024 / 1024).toFixed(2) %> MB</dd>
                     <dt>Páginas</dt><dd><%= doc.page_count || '—' %></dd>
-                    <dt>Upload em</dt><dd><%= doc.uploaded_at.slice(0, 16).replace('T', ' ') %></dd>
+                    <dt>Upload em (Brasília)</dt><dd><%= formatDateTime(doc.uploaded_at) %></dd>
                     <dt>Status</dt>
                     <dd>
                         <% if (doc.is_active) { %>
@@ -97,13 +97,13 @@
                 <% if (revisions.length) { %>
                     <div class="table-responsive">
                         <table class="table">
-                            <thead><tr><th>Arquivo</th><th>Páginas</th><th>Data (Brasília)</th><th>Status</th><th>Ações</th></tr></thead>
+                            <thead><tr><th>Arquivo</th><th>Páginas</th><th>Data/hora (Brasília)</th><th>Status</th><th>Ações</th></tr></thead>
                             <tbody>
                                 <% revisions.forEach(revision => { %>
                                     <tr data-revision-id="<%= revision.id %>" data-revision-state="<%= revision.status %>">
                                         <td><strong><%= revision.original_filename %></strong><div class="text-sm text-muted"><%= (revision.file_size / 1048576).toFixed(2) %> MB</div></td>
                                         <td><%= revision.page_count || '—' %></td>
-                                        <td class="text-sm"><%= revisionDate(revision.activated_at || revision.created_at) %></td>
+                                        <td class="text-sm"><%= formatDateTime(revision.activated_at || revision.created_at) %></td>
                                         <td><span class="revision-state"><%= revisionLabels[revision.status] || revision.status %></span>
                                             <% if (revision.status === 'preparing' && revision.total) { %><span class="revision-progress"> · <%= Math.floor(revision.completed / revision.total * 100) %>%</span><% } else { %><span class="revision-progress"></span><% } %>
                                             <% if (revision.error) { %><div class="text-sm" role="alert"><%= revision.error %></div><% } %>
@@ -216,7 +216,7 @@
                                     <th>Views</th>
                                     <th>Expira em</th>
                                     <th>Status</th>
-                                    <th>Criado em</th>
+                                    <th>Criado em (Brasília)</th>
                                     <th>Ações</th>
                                 </tr>
                             </thead>
@@ -248,7 +248,7 @@
                                         </td>
                                         <td class="text-sm">
                                             <% if (link.expires_at) { %>
-                                                <%= expiryInput(link.expires_at).replace('T', ' ') %>
+                                                <%= formatDateTime(link.expires_at) %>
                                                 <span class="text-muted">(Brasília)</span>
                                             <% } else { %>—<% } %>
                                         </td>
@@ -259,7 +259,7 @@
                                                 <span class="badge badge-danger">Inativo</span>
                                             <% } %>
                                         </td>
-                                        <td class="text-sm"><%= link.created_at.slice(0, 16).replace('T', ' ') %></td>
+                                        <td class="text-sm"><%= formatDateTime(link.created_at) %></td>
                                         <td class="actions-cell">
                                             <a class="btn btn-xs btn-secondary" href="/admin/links/<%= link.id %>/preview">Testar imagens</a>
                                             <span class="text-sm text-muted image-link-status" data-link-id="<%= link.id %>"></span>

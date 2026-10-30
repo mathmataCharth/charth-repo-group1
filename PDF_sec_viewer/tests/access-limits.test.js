@@ -6,7 +6,7 @@ const fs = require('fs');
 const path = require('path');
 const os = require('os');
 const express = require('express');
-const { parseAccessLimits, expiryInput, isExpired } = require('../src/utils/accessLimits');
+const { parseAccessLimits, expiryInput, formatDateTime, isExpired } = require('../src/utils/accessLimits');
 const previousCwd = process.cwd();
 const previousUpload = process.env.UPLOAD_DIR;
 const folder = fs.mkdtempSync(path.join(os.tmpdir(), 'access-limits-'));
@@ -25,6 +25,11 @@ before(async () => {
     other = createLink(document, 'other-token', 'Other', '', 'other-hash', 8, null);
     db.prepare('UPDATE access_links SET access_code = ? WHERE id = ?').run('58391', link);
     db.prepare('UPDATE access_links SET views_count = 5 WHERE id = ?').run(link);
+    db.prepare("UPDATE documents SET uploaded_at='2026-10-30 18:05:00' WHERE id=?").run(document);
+    db.prepare("UPDATE access_links SET created_at='2026-10-30 18:05:00' WHERE id=?").run(link);
+    db.prepare("INSERT INTO access_logs(access_link_id,action,created_at) VALUES (?,'view_start','2026-10-30 18:05:59')").run(link);
+    db.prepare(`INSERT INTO document_revisions(document_id,stored_filename,original_filename,file_size,page_count,status,created_at,activated_at)
+        VALUES (?,'original.pdf','original.pdf',100,228,'active','2026-10-30 18:05:00','2026-10-30 18:05:00')`).run(document);
     const app = express();
     app.use(express.urlencoded({ extended: false }));
     app.use(express.json());
@@ -61,12 +66,17 @@ function update(values, { id = link, admin = true } = {}) {
 
 test('date editing uses Brasilia time and preserves the instant of legacy UTC deadlines', () => {
     assert.equal(expiryInput('2099-11-04 18:30:00'), '2099-11-04T15:30');
+    assert.equal(formatDateTime('2099-11-04 18:30:59'), '04/11/2099 15:30');
+    assert.equal(formatDateTime('2026-01-01T01:02:59Z'), '31/12/2025 22:02');
+    assert.equal(formatDateTime('2026-10-30T15:05:00-03:00'), '30/10/2026 15:05');
+    for (const missing of [null, undefined, '', 'invalid']) assert.equal(formatDateTime(missing), '—');
     const beforeTz = process.env.TZ;
     process.env.TZ = 'Pacific/Auckland';
     try {
         const result = parseAccessLimits({ max_views: '20', expires_at: '2099-11-04T15:30' });
         assert.deepEqual(result, { maxViews: 20, expiresAt: '2099-11-04T18:30:00.000Z' });
         assert.equal(expiryInput(result.expiresAt), '2099-11-04T15:30');
+        assert.equal(formatDateTime(result.expiresAt), '04/11/2099 15:30');
         assert.equal(isExpired('2099-11-04 18:30:00', Date.parse('2099-11-04T18:29:59Z')), false);
         assert.equal(isExpired(result.expiresAt, Date.parse('2099-11-04T18:30:00Z')), true);
     } finally {
@@ -88,6 +98,17 @@ test('document panel exposes edit controls with existing limits prefilled', asyn
     assert.ok(html.includes('Anterior: 58391'));
     assert.ok(html.includes(`href="/admin/links/${link}/preview"`));
     assert.ok(html.includes('Testar imagens'));
+    assert.ok(html.includes('04/11/2099 15:30'));
+    assert.ok((html.match(/30\/10\/2026 15:05/g) || []).length >= 3, 'upload, revision and access creation use the same format');
+});
+
+test('dashboard, consultation and logs display dates in Brasilia without changing stored deadlines', async () => {
+    const before = getLinkById(link);
+    for (const [route, displayed] of [['/admin/dashboard', '30/10/2026 15:05'], ['/admin/accesses', '04/11/2099 15:30'], ['/admin/logs', '30/10/2026 15:05']]) {
+        const response = await fetch(base + route, { headers: { 'x-test-admin': '1' } });
+        assert.equal(response.status, 200); assert.ok((await response.text()).includes(displayed));
+    }
+    assert.deepEqual(getLinkById(link), before);
 });
 
 test('editing requires admin authentication and unknown links return 404', async () => {
